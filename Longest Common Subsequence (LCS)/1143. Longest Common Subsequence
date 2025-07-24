@@ -1,0 +1,47 @@
+// -------------------------------------------------------------
+// Leetcode 1143: Longest Common Subsequence
+// https://leetcode.com/problems/longest-common-subsequence/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// We want to find the length of the **longest subsequence** common to both strings.
+// A subsequence is a sequence derived by deleting characters (not rearranging).
+//
+// Example:
+// text1 = "abcde", text2 = "ace" → LCS = "ace", length = 3
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Use DP to compare prefixes of both strings
+// ➤ Create 2D DP table: dp[i][j] = LCS of text1[0..i-1], text2[0..j-1]
+// ➤ If characters match: dp[i][j] = 1 + dp[i-1][j-1]
+// ➤ Else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+//
+// Base Case: dp[0][j] = dp[i][0] = 0 (empty string vs anything → LCS is 0)
+// Final Answer: dp[n][m]
+// -------------------------------------------------------------
+
+public class Solution {
+    public int LongestCommonSubsequence(string text1, string text2) {
+        int n = text1.Length;
+        int m = text2.Length;
+
+        // dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+        int[,] dp = new int[n + 1, m + 1];
+
+        // Initialize base cases: already 0 by default for C# arrays
+        // dp[0,*] and dp[*,0] = 0 → comparing with empty string
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i, j] = 1 + dp[i - 1, j - 1]; // chars match → take both
+                } else {
+                    dp[i, j] = Math.Max(dp[i - 1, j], dp[i, j - 1]); // skip one
+                }
+            }
+        }
+
+        return dp[n, m];
+    }
+}
