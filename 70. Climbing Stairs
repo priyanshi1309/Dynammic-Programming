@@ -1,0 +1,78 @@
+using System;
+
+public class ClimbStairsSolutions
+{
+    // 1. Recursive (Brute Force)
+    public int ClimbStairsRecursive(int steps)
+    {
+        if (steps <= 2) return steps;
+        return ClimbStairsRecursive(steps - 1) + ClimbStairsRecursive(steps - 2);
+    }
+
+    // 2. Top-Down DP (Memoization)
+    public int ClimbStairsMemoized(int steps)
+    {
+        if (steps <= 2) return steps;
+
+        int[] memo = new int[steps];
+        Array.Fill(memo, -1);
+        memo[0] = 1; // ways to climb 1 step
+        memo[1] = 2; // ways to climb 2 steps
+
+        return ComputeWays(steps - 1);
+
+        int ComputeWays(int i)
+        {
+            if (memo[i] != -1) return memo[i];
+            return memo[i] = ComputeWays(i - 1) + ComputeWays(i - 2);
+        }
+    }
+
+    // 3. Bottom-Up DP (Tabulation)
+    public int ClimbStairsTabulation(int steps)
+    {
+        if (steps <= 2) return steps;
+
+        int[] dp = new int[steps];
+        dp[0] = 1; // 1 step
+        dp[1] = 2; // 2 steps
+
+        for (int i = 2; i < steps; i++)
+        {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+
+        return dp[steps - 1];
+    }
+
+    // 4. Bottom-Up DP with Space Optimization
+    public int ClimbStairsOptimized(int steps)
+    {
+        if (steps <= 2) return steps;
+
+        int oneStepBefore = 2;   // ways to reach (i-1)th step
+        int twoStepsBefore = 1;  // ways to reach (i-2)th step
+
+        for (int i = 2; i < steps; i++)
+        {
+            int current = oneStepBefore + twoStepsBefore;
+            twoStepsBefore = oneStepBefore;
+            oneStepBefore = current;
+        }
+
+        return oneStepBefore;
+    }
+
+    // Optional Main for quick testing
+    public static void Main()
+    {
+        ClimbStairsSolutions solver = new ClimbStairsSolutions();
+        int steps = 5;
+
+        Console.WriteLine("Steps: " + steps);
+        Console.WriteLine("Recursive: " + solver.ClimbStairsRecursive(steps));
+        Console.WriteLine("Memoized: " + solver.ClimbStairsMemoized(steps));
+        Console.WriteLine("Tabulation: " + solver.ClimbStairsTabulation(steps));
+        Console.WriteLine("Optimized: " + solver.ClimbStairsOptimized(steps));
+    }
+}
