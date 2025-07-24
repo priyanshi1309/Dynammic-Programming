@@ -1,0 +1,125 @@
+// -------------------------------------------------------------
+// Leetcode 518: Coin Change II
+// https://leetcode.com/problems/coin-change-ii/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// You're given coin denominations and a target amount. You need to find the
+// number of **combinations** (not permutations) of coins that sum to the amount.
+// Each coin can be used **unlimited times** (unbounded knapsack style).
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Try all combinations with recursion (Exponential Time)
+// ➤ Optimize with Memoization (Top-Down DP)
+// ➤ Convert to Tabulation (Bottom-Up DP)
+// ➤ Space-optimize with 1D array (most efficient)
+// -------------------------------------------------------------
+//
+// Core Idea: For each coin, we either:
+//     - TAKE it → stay at same index (since infinite supply), reduce target
+//     - NOT TAKE it → move to previous index, keep target
+//
+// Transition: dp[i][t] = dp[i-1][t] + dp[i][t - coin[i]]
+// Base Case: t == 0 → 1 way (pick nothing); if i == 0 → t % coins[0] == 0 ? 1 : 0
+// -------------------------------------------------------------
+
+// ✅ 1. Pure Recursion (Not Recommended)
+// Time Complexity: Exponential
+// Space Complexity: O(amount) — recursion stack
+public class Solution1 {
+    public int Change(int amount, int[] coins) {
+        int n = coins.Length;
+        return Helper(n - 1, amount);
+
+        int Helper(int idx, int target) {
+            if (target == 0) return 1; // valid combination
+            if (idx == 0) return target % coins[0] == 0 ? 1 : 0;
+
+            int notTake = Helper(idx - 1, target); // skip coin
+            int take = 0;
+            if (coins[idx] <= target)
+                take = Helper(idx, target - coins[idx]); // pick again (unbounded)
+
+            return take + notTake;
+        }
+    }
+}
+
+// ✅ 2. Recursion with Memoization (Top-Down DP)
+// Time Complexity: O(n * amount)
+// Space Complexity: O(n * amount) + recursion stack
+public class Solution2 {
+    public int Change(int amount, int[] coins) {
+        int n = coins.Length;
+        var memo = new Dictionary<(int, int), int>();
+        return Helper(n - 1, amount);
+
+        int Helper(int idx, int target) {
+            if (target == 0) return 1;
+            if (idx == 0) return target % coins[0] == 0 ? 1 : 0;
+
+            var key = (idx, target);
+            if (memo.ContainsKey(key)) return memo[key];
+
+            int notTake = Helper(idx - 1, target);
+            int take = 0;
+            if (coins[idx] <= target)
+                take = Helper(idx, target - coins[idx]);
+
+            return memo[key] = take + notTake;
+        }
+    }
+}
+
+// ✅ 3. Tabulation (Bottom-Up DP)
+// Time Complexity: O(n * amount)
+// Space Complexity: O(n * amount)
+public class Solution3 {
+    public int Change(int amount, int[] coins) {
+        int n = coins.Length;
+        int[,] dp = new int[n, amount + 1];
+
+        // Base case: ways to make amount t using only coins[0]
+        for (int t = 0; t <= amount; t++) {
+            dp[0, t] = (t % coins[0] == 0) ? 1 : 0;
+        }
+
+        for (int idx = 1; idx < n; idx++) {
+            for (int t = 0; t <= amount; t++) {
+                int notTake = dp[idx - 1, t];
+                int take = (coins[idx] <= t) ? dp[idx, t - coins[idx]] : 0;
+                dp[idx, t] = take + notTake;
+            }
+        }
+
+        return dp[n - 1, amount];
+    }
+}
+
+// ✅ 4. Space Optimization (1D DP)
+// Time Complexity: O(n * amount)
+// Space Complexity: O(amount)
+public class Solution4 {
+    public int Change(int amount, int[] coins) {
+        int n = coins.Length;
+        int[] dp = new int[amount + 1];
+
+        // Base case: only using coins[0]
+        for (int t = 0; t <= amount; t++) {
+            dp[t] = (t % coins[0] == 0) ? 1 : 0;
+        }
+
+        for (int idx = 1; idx < n; idx++) {
+            int[] curr = new int[amount + 1];
+            for (int t = 0; t <= amount; t++) {
+                int notTake = dp[t];
+                int take = (coins[idx] <= t) ? curr[t - coins[idx]] : 0;
+                curr[t] = take + notTake;
+            }
+            dp = curr;
+        }
+
+        return dp[amount];
+    }
+}
