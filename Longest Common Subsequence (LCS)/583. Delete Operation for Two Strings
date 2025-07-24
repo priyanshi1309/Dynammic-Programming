@@ -1,0 +1,49 @@
+// -------------------------------------------------------------
+// Leetcode 583: Delete Operation for Two Strings
+// https://leetcode.com/problems/delete-operation-for-two-strings/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// To make two strings equal using only deletions, we want to:
+// ➤ Keep their **Longest Common Subsequence (LCS)**
+// ➤ Delete all other characters not part of the LCS
+//
+// For example:
+// word1 = "sea", word2 = "eat"
+// LCS = "ea" → delete 's' from word1 and 't' from word2 → 2 deletions
+//
+// So, final answer = (word1.Length - LCS) + (word2.Length - LCS)
+// => n + m - 2 * LCS
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Compute LCS using 1D Space-Optimized DP
+// ➤ For each character match, increment LCS
+// ➤ Else take max of previous states
+// ➤ Final Answer: (n + m - 2 * LCS)
+// -------------------------------------------------------------
+
+public class Solution {
+    public int MinDistance(string word1, string word2) {
+        int n = word1.Length;
+        int m = word2.Length;
+
+        int[] dp = new int[m + 1]; // LCS table: only need 1D
+        Array.Fill(dp, 0);
+
+        for (int i = 1; i <= n; i++) {
+            int[] curr = new int[m + 1];
+            for (int j = 1; j <= m; j++) {
+                if (word1[i - 1] == word2[j - 1]) {
+                    curr[j] = 1 + dp[j - 1]; // chars match → extend LCS
+                } else {
+                    curr[j] = Math.Max(dp[j], curr[j - 1]); // skip one
+                }
+            }
+            dp = curr;
+        }
+
+        // Final answer: total deletions = (n - LCS) + (m - LCS) = n + m - 2 * LCS
+        return n + m - 2 * dp[m];
+    }
+}
