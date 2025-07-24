@@ -1,0 +1,107 @@
+// -------------------------------------------------------------
+// Leetcode 279: Perfect Squares
+// https://leetcode.com/problems/perfect-squares/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// You are given an integer `n`, and need to find the minimum number
+// of perfect squares (like 1, 4, 9, 16...) that sum up to `n`.
+//
+// This is a **minimization** problem where we can **reuse elements**
+// → think of it as an **Unbounded Knapsack**, but minimizing count.
+//
+// For each i ≤ n, try subtracting all square numbers ≤ i
+// and take the minimum over all possibilities.
+// -------------------------------------------------------------
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Try all perfect square subtractions using recursion (Exponential Time)
+// ➤ Add Memoization to cache subproblems (Top-Down DP)
+// ➤ Use Tabulation to iteratively build solution (Bottom-Up DP)
+// ➤ Space optimize to 1D DP array
+//
+// Transition: dp[i] = 1 + min(dp[i - sq]) for all sq ≤ i
+// Base Case: dp[0] = 0 → takes 0 numbers to form 0
+// -------------------------------------------------------------
+
+// ✅ 1. Pure Recursion (Not Recommended)
+// Time Complexity: Exponential
+// Space Complexity: O(n) — recursion stack
+public class Solution1 {
+    public int NumSquares(int n) {
+        return Helper(n);
+
+        int Helper(int target) {
+            if (target == 0) return 0;
+
+            int minCount = int.MaxValue;
+            for (int i = 1; i * i <= target; i++) {
+                int count = 1 + Helper(target - i * i);
+                minCount = Math.Min(minCount, count);
+            }
+            return minCount;
+        }
+    }
+}
+
+// ✅ 2. Recursion with Memoization (Top-Down DP)
+// Time Complexity: O(n * sqrt(n))
+// Space Complexity: O(n) + recursion stack
+public class Solution2 {
+    public int NumSquares(int n) {
+        var memo = new Dictionary<int, int>();
+        return Helper(n);
+
+        int Helper(int target) {
+            if (target == 0) return 0;
+            if (memo.ContainsKey(target)) return memo[target];
+
+            int minCount = int.MaxValue;
+            for (int i = 1; i * i <= target; i++) {
+                int count = 1 + Helper(target - i * i);
+                minCount = Math.Min(minCount, count);
+            }
+            return memo[target] = minCount;
+        }
+    }
+}
+
+// ✅ 3. Tabulation (Bottom-Up DP)
+// Time Complexity: O(n * sqrt(n))
+// Space Complexity: O(n)
+public class Solution3 {
+    public int NumSquares(int n) {
+        int[] dp = new int[n + 1];
+        dp[0] = 0; // 0 requires 0 numbers
+
+        for (int i = 1; i <= n; i++) {
+            int minCount = int.MaxValue;
+            for (int j = 1; j * j <= i; j++) {
+                minCount = Math.Min(minCount, 1 + dp[i - j * j]);
+            }
+            dp[i] = minCount;
+        }
+
+        return dp[n];
+    }
+}
+
+// ✅ 4. Space Optimization
+// In this case, the Tabulation solution is already space-efficient using 1D array
+// No further optimization possible beyond O(n)
+public class Solution4 {
+    public int NumSquares(int n) {
+        int[] dp = new int[n + 1];
+        dp[0] = 0;
+
+        for (int i = 1; i <= n; i++) {
+            dp[i] = int.MaxValue;
+            for (int j = 1; j * j <= i; j++) {
+                dp[i] = Math.Min(dp[i], 1 + dp[i - j * j]);
+            }
+        }
+
+        return dp[n];
+    }
+}
