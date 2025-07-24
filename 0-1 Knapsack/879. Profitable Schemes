@@ -1,0 +1,87 @@
+// -------------------------------------------------------------
+// Leetcode 879: Profitable Schemes
+// https://leetcode.com/problems/profitable-schemes/
+// -------------------------------------------------------------
+
+// ✅ 1. Pure Recursion (Not Recommended)
+// Time Complexity: O(2^n * m * p)
+// Space Complexity: O(n) — call stack depth
+public class Solution1 {
+    public int ProfitableSchemes(int n, int minProfit, int[] group, int[] profit) {
+        return Helper(group.Length - 1, n, 0);
+
+        int Helper(int idx, int left, int p) {
+            if (idx < 0) return p >= minProfit ? 1 : 0;
+
+            int notTake = Helper(idx - 1, left, p);
+            int take = 0;
+            if (left >= group[idx]) {
+                take = Helper(idx - 1, left - group[idx], p + profit[idx]);
+            }
+
+            return take + notTake;
+        }
+    }
+}
+
+// ✅ 2. Recursion with Memoization (Top-Down DP using Dictionary)
+// Time Complexity: O(n * m * p)
+// Space Complexity: O(n * m * p) + recursion stack
+public class Solution2 {
+    const int MOD = 1_000_000_007;
+
+    public int ProfitableSchemes(int n, int minProfit, int[] group, int[] profit) {
+        var memo = new Dictionary<(int, int, int), int>();
+        int len = group.Length;
+
+        return Helper(len - 1, n, 0);
+
+        int Helper(int idx, int left, int p) {
+            if (idx < 0) return p >= minProfit ? 1 : 0;
+
+            var key = (idx, left, Math.Min(p, minProfit));
+            if (memo.ContainsKey(key)) return memo[key];
+
+            int notTake = Helper(idx - 1, left, p);
+            int take = 0;
+            if (left >= group[idx]) {
+                take = Helper(idx - 1, left - group[idx], Math.Min(minProfit, p + profit[idx]));
+            }
+
+            return memo[key] = (take + notTake) % MOD;
+        }
+    }
+}
+
+// ✅ 3. Tabulation (Bottom-Up DP)
+// Time Complexity: O(n * m * minProfit)
+// Space Complexity: O(n * minProfit)
+public class Solution3 {
+    const int MOD = 1_000_000_007;
+
+    public int ProfitableSchemes(int n, int minProfit, int[] group, int[] profit) {
+        int[,] dp = new int[n + 1, minProfit + 1];
+        dp[0, 0] = 1;
+
+        for (int idx = 0; idx < group.Length; idx++) {
+            int g = group[idx];
+            int p = profit[idx];
+
+            for (int i = n; i >= g; i--) {
+                for (int j = minProfit; j >= 0; j--) {
+                    int newProfit = Math.Min(minProfit, j + p);
+                    dp[i, newProfit] = (dp[i, newProfit] + dp[i - g, j]) % MOD;
+                }
+            }
+        }
+
+        int result = 0;
+        for (int i = 0; i <= n; i++) {
+            result = (result + dp[i, minProfit]) % MOD;
+        }
+
+        return result;
+    }
+}
+
+
