@@ -1,0 +1,105 @@
+// -------------------------------------------------------------
+// Leetcode 474: Ones and Zeroes
+// https://leetcode.com/problems/ones-and-zeroes/
+// -------------------------------------------------------------
+
+// ✅ 1. Pure Recursion (Not Recommended)
+// Time Complexity: O(2^n)
+// Space Complexity: O(n) — recursion depth
+public class Solution1 {
+    public int FindMaxForm(string[] strs, int m, int n) {
+        List<(int zero, int one)> counts = new();
+        foreach (var str in strs) {
+            int zero = 0, one = 0;
+            foreach (char ch in str) {
+                if (ch == '0') zero++;
+                else one++;
+            }
+            counts.Add((zero, one));
+        }
+
+        return Helper(strs.Length - 1, m, n);
+
+        int Helper(int idx, int m, int n) {
+            if (idx < 0) return 0;
+
+            var (zero, one) = counts[idx];
+
+            int notTake = Helper(idx - 1, m, n);
+            int take = 0;
+            if (m >= zero && n >= one) {
+                take = 1 + Helper(idx - 1, m - zero, n - one);
+            }
+
+            return Math.Max(take, notTake);
+        }
+    }
+}
+
+// ✅ 2. Recursion with Memoization (Top-Down DP)
+// Time Complexity: O(n * m * n)
+// Space Complexity: O(n * m * n) + recursion stack
+public class Solution2 {
+    public int FindMaxForm(string[] strs, int m, int n) {
+        List<(int zero, int one)> counts = new();
+        for (int i = 0; i < strs.Length; i++) {
+            int zero = 0, one = 0;
+            foreach (char ch in strs[i]) {
+                if (ch == '0') zero++;
+                else one++;
+            }
+            counts.Add((zero, one));
+        }
+
+        Dictionary<(int idx, int m, int n), int> memo = new();
+
+        return Helper(strs.Length - 1, m, n);
+
+        int Helper(int idx, int m, int n) {
+            if (idx < 0) return 0;
+
+            var key = (idx, m, n);
+            if (memo.ContainsKey(key)) return memo[key];
+
+            var (zero, one) = counts[idx];
+
+            int notTake = Helper(idx - 1, m, n);
+            int take = 0;
+            if (m >= zero && n >= one) {
+                take = 1 + Helper(idx - 1, m - zero, n - one);
+            }
+
+            return memo[key] = Math.Max(take, notTake);
+        }
+    }
+}
+
+// ✅ 3. Tabulation (Bottom-Up DP)
+// Time Complexity: O(n * m * n)
+// Space Complexity: O(m * n)
+public class Solution3 {
+    public int FindMaxForm(string[] strs, int m, int n) {
+        List<(int zero, int one)> counts = new();
+        for (int i = 0; i < strs.Length; i++) {
+            int zero = 0, one = 0;
+            foreach (char ch in strs[i]) {
+                if (ch == '0') zero++;
+                else one++;
+            }
+            counts.Add((zero, one));
+        }
+
+        int[,] dp = new int[m + 1, n + 1];
+
+        foreach (var (zero, one) in counts) {
+            for (int i = m; i >= zero; i--) {
+                for (int j = n; j >= one; j--) {
+                    dp[i, j] = Math.Max(dp[i, j], 1 + dp[i - zero, j - one]);
+                }
+            }
+        }
+
+        return dp[m, n];
+    }
+}
+
