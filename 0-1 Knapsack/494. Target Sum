@@ -1,1 +1,43 @@
+using System;
 
+public class TargetSumWays
+{
+    public int FindTargetSumWaysTabulated(int[] nums, int target)
+    {
+        int totalSum = 0;
+        foreach (int num in nums)
+            totalSum += num;
+
+        // The sum range is [-totalSum, totalSum], so we offset it
+        int offset = totalSum;
+        int n = nums.Length;
+
+        // DP table: dp[i][sum + offset] = #ways to reach 'sum' using first i elements
+        int[,] dp = new int[n + 1, 2 * totalSum + 1];
+        dp[0, offset] = 1; // Base case: 0 sum with 0 elements
+
+        for (int i = 1; i <= n; i++)
+        {
+            for (int sum = -totalSum; sum <= totalSum; sum++)
+            {
+                int index = sum + offset;
+                if (dp[i - 1, index] > 0)
+                {
+                    int addIndex = sum + nums[i - 1] + offset;
+                    int subtractIndex = sum - nums[i - 1] + offset;
+
+                    if (addIndex >= 0 && addIndex <= 2 * totalSum)
+                        dp[i, addIndex] += dp[i - 1, index];
+
+                    if (subtractIndex >= 0 && subtractIndex <= 2 * totalSum)
+                        dp[i, subtractIndex] += dp[i - 1, index];
+                }
+            }
+        }
+
+        int targetIndex = target + offset;
+        return (targetIndex < 0 || targetIndex > 2 * totalSum) ? 0 : dp[n, targetIndex];
+    }
+
+    
+}
