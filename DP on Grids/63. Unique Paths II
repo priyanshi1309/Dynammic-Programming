@@ -64,7 +64,7 @@ public class Solution {
         int m = grid.Length;
         int n = grid[0].Length;
         
-        // 1D array to store the number of ways to reach each cell
+        // 1D array to store number of ways to reach each cell
         int[] dp = new int[n];
         
         // If the starting cell is an obstacle, return 0 immediately
@@ -97,3 +97,14 @@ public class Solution {
         return dp[n - 1];
     }
 }
+
+
+
+// -------------------------------------------------------------
+// Summary of Approaches:
+// -------------------------------------------------------------
+// | Approach                   | Time Complexity | Space Complexity  |
+// |----------------------------|-----------------|-------------------|
+// | Tabulation (2D DP)         | O(m * n)        | O(m * n)          |
+// | Space Optimized (1D DP)    | O(m * n)        | O(n)              |
+// -------------------------------------------------------------
