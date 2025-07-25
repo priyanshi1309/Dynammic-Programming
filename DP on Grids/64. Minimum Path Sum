@@ -1,0 +1,139 @@
+// -------------------------------------------------------------
+// Leetcode 64: Minimum Path Sum
+// https://leetcode.com/problems/minimum-path-sum/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// Given a grid of non-negative numbers, the goal is to find the path from the top-left corner to the bottom-right corner 
+// such that the sum of all numbers along the path is minimized. 
+// You can only move either **down** or **right** at any point.
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Use dynamic programming (DP) to solve this problem
+// ➤ Let dp[i][j] represent the minimum path sum to reach cell (i, j)
+// ➤ Recurrence relation: dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])
+// ➤ The final answer will be stored in dp[m-1][n-1]
+//
+// Base Case: dp[0][0] = grid[0][0] (start position)
+// Final Answer: dp[m-1][n-1] (minimum path sum to reach bottom-right corner)
+// -------------------------------------------------------------
+
+public class Solution {
+
+    // -------------------------------------------------------------
+    // 1. Recursive Solution
+    // -------------------------------------------------------------
+    public int MinPathSum(int[][] grid) {
+        return FindMinPath(grid, grid.Length - 1, grid[0].Length - 1);
+    }
+    
+    // Recursive function to find the minimum path sum
+    private int FindMinPath(int[][] grid, int i, int j) {
+        // Base case: if we are at the first row or column, return the sum
+        if (i == 0 && j == 0) return grid[i][j];
+        
+        // If we're in the first row, only move right
+        if (i == 0) return grid[i][j] + FindMinPath(grid, i, j - 1);
+        
+        // If we're in the first column, only move down
+        if (j == 0) return grid[i][j] + FindMinPath(grid, i - 1, j);
+        
+        // Recursive case: choose the minimum of moving down or right
+        return grid[i][j] + Math.Min(FindMinPath(grid, i - 1, j), FindMinPath(grid, i, j - 1));
+    }
+
+    // -------------------------------------------------------------
+    // 2. Memoization Solution
+    // -------------------------------------------------------------
+    public int MinPathSumMemo(int[][] grid) {
+        int m = grid.Length;
+        int n = grid[0].Length;
+        int[,] memo = new int[m, n];
+        return FindMinPathMemo(grid, m - 1, n - 1, memo);
+    }
+    
+    // Memoized recursive function to find the minimum path sum
+    private int FindMinPathMemo(int[][] grid, int i, int j, int[,] memo) {
+        // Base case: if we are at the first row or column, return the sum
+        if (i == 0 && j == 0) return grid[i][j];
+        
+        // If already computed, return the stored result
+        if (memo[i, j] != 0) return memo[i, j];
+        
+        // If we're in the first row, only move right
+        if (i == 0) return grid[i][j] + FindMinPathMemo(grid, i, j - 1, memo);
+        
+        // If we're in the first column, only move down
+        if (j == 0) return grid[i][j] + FindMinPathMemo(grid, i - 1, j, memo);
+        
+        // Calculate the result and store it in the memoization table
+        memo[i, j] = grid[i][j] + Math.Min(FindMinPathMemo(grid, i - 1, j, memo), FindMinPathMemo(grid, i, j - 1, memo));
+        return memo[i, j];
+    }
+
+    // -------------------------------------------------------------
+    // 3. Tabulation Solution (Bottom-Up DP)
+    // -------------------------------------------------------------
+    public int MinPathSumTabulation(int[][] grid) {
+        int m = grid.Length;
+        int n = grid[0].Length;
+        int[,] dp = new int[m, n];
+
+        // Initialization: fill the first row and column
+        dp[0, 0] = grid[0][0];
+        
+        // Fill the first row (can only move right)
+        for (int j = 1; j < n; j++) {
+            dp[0, j] = dp[0, j - 1] + grid[0][j];
+        }
+        
+        // Fill the first column (can only move down)
+        for (int i = 1; i < m; i++) {
+            dp[i, 0] = dp[i - 1, 0] + grid[i][0];
+        }
+        
+        // Fill the rest of the dp table
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i, j] = grid[i][j] + Math.Min(dp[i - 1, j], dp[i, j - 1]);
+            }
+        }
+
+        // Return the minimum path sum to reach the bottom-right corner
+        return dp[m - 1, n - 1];
+    }
+
+    // -------------------------------------------------------------
+    // 4. Space Optimized Tabulation Solution (1D DP)
+    // -------------------------------------------------------------
+    public int MinPathSumSpaceOptimized(int[][] grid) {
+        int m = grid.Length;
+        int n = grid[0].Length;
+        
+        // 1D array to store the minimum path sum for each column
+        int[] dp = new int[n];
+        
+        // Initialize the first element of the first row
+        dp[0] = grid[0][0];
+        
+        // Initialize the first row (can only move right)
+        for (int j = 1; j < n; j++) {
+            dp[j] = dp[j - 1] + grid[0][j];
+        }
+        
+        // Iterate over the remaining rows
+        for (int i = 1; i < m; i++) {
+            // Update the first column (can only move down)
+            dp[0] += grid[i][0];
+            
+            // Update the rest of the row
+            for (int j = 1; j < n; j++) {
+                dp[j] = grid[i][j] + Math.Min(dp[j], dp[j - 1]);
+            }
+        }
+
+        // The result is stored in the last element of dp array
+        return dp[n - 1];
+    }
+}
