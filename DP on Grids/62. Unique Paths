@@ -1,0 +1,114 @@
+// -------------------------------------------------------------
+// Leetcode 62: Unique Paths
+// https://leetcode.com/problems/unique-paths/
+// -------------------------------------------------------------
+//
+// INTUITION:
+// The robot can only move **down** or **right** at any time. The task is to find the number of unique ways to reach the bottom-right corner.
+// This is a combinatorial problem where the robot needs to make exactly `m-1` downward moves and `n-1` rightward moves.
+// The challenge is to count how many distinct ways there are to arrange these movements.
+//
+// Example:
+// m = 3, n = 7
+// Possible paths: 28 paths
+//
+// APPROACH FLOW:
+// -------------------------------------------------------------
+// ➤ Use DP to count the number of ways to reach each cell in the grid
+// ➤ Create a DP table: dp[i][j] = number of unique ways to reach grid[i][j]
+// ➤ Initialization:
+//    - dp[0][0] = 1 (start position)
+//    - For first row and first column, only one way (move right or move down)
+// ➤ Fill the table by adding the number of ways to get to each position from the left or from above:
+//    dp[i][j] = dp[i-1][j] + dp[i][j-1] (sum of ways from top and left)
+//
+// Base Case: dp[0][0] = 1 (start at the top-left corner)
+// Final Answer: dp[m-1][n-1] (number of ways to reach bottom-right corner)
+// -------------------------------------------------------------
+
+public class Solution {
+
+    // -------------------------------------------------------------
+    // 1. Recursive Solution
+    // -------------------------------------------------------------
+    public int UniquePaths(int m, int n) {
+        return FindPaths(m - 1, n - 1);
+    }
+    
+    // Recursive function to count paths
+    private int FindPaths(int i, int j) {
+        // Base case: if we're at the top row or left column, there's only 1 way
+        if (i == 0 || j == 0) return 1;
+        
+        // Recursive call: move up or left
+        return FindPaths(i - 1, j) + FindPaths(i, j - 1);
+    }
+
+    // -------------------------------------------------------------
+    // 2. Memoization Solution
+    // -------------------------------------------------------------
+    public int UniquePathsMemo(int m, int n) {
+        int[,] memo = new int[m, n];
+        return FindPathsMemo(m - 1, n - 1, memo);
+    }
+    
+    // Memoized recursive function to count paths
+    private int FindPathsMemo(int i, int j, int[,] memo) {
+        // Base case: if we're at the top row or left column, there's only 1 way
+        if (i == 0 || j == 0) return 1;
+        
+        // If already computed, return the result
+        if (memo[i, j] != 0) return memo[i, j];
+        
+        // Compute the result recursively and store it in the memoization table
+        memo[i, j] = FindPathsMemo(i - 1, j, memo) + FindPathsMemo(i, j - 1, memo);
+        return memo[i, j];
+    }
+
+    // -------------------------------------------------------------
+    // 3. Tabulation Solution (Bottom-Up DP)
+    // -------------------------------------------------------------
+    public int UniquePathsTabulation(int m, int n) {
+        // DP table to store number of ways to reach each cell
+        int[,] dp = new int[m, n];
+        
+        // Initialization: there is only one way to reach any cell in the first row or first column
+        for (int i = 0; i < m; i++) {
+            dp[i, 0] = 1; // There's only one way to reach cells in the first column (move down)
+        }
+        for (int j = 0; j < n; j++) {
+            dp[0, j] = 1; // There's only one way to reach cells in the first row (move right)
+        }
+
+        // Fill the DP table for all other cells
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i, j] = dp[i - 1, j] + dp[i, j - 1]; // Sum of ways from top and left
+            }
+        }
+
+        // The number of unique paths to the bottom-right corner is stored in dp[m-1, n-1]
+        return dp[m - 1, n - 1];
+    }
+
+    // -------------------------------------------------------------
+    // 4. Space Optimized Tabulation Solution (1D DP)
+    // -------------------------------------------------------------
+    public int UniquePathsSpaceOptimized(int m, int n) {
+        // 1D array for storing the number of ways to reach each cell in a row
+        int[] dp = new int[n];
+        
+        // Initialization: There is only 1 way to reach each cell in the first column
+        dp[0] = 1;
+        
+        // Fill the array for all other cells
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[j] += dp[j - 1]; // Sum of ways from top and left
+            }
+        }
+
+        // The number of unique paths to the bottom-right corner is stored in dp[n-1]
+        return dp[n - 1];
+    }
+}
